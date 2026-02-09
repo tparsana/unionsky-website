@@ -10,6 +10,7 @@ import FlightHistory from "@/components/flight-history"
 import FlightsInView from "@/components/flights-in-view"
 import { fetchFlights } from "@/lib/api"
 import type { Flight, FlightStats } from "@/lib/types"
+import Image from "next/image"
 
 export default function FlightDashboard() {
   const [flights, setFlights] = useState<Flight[]>([])
@@ -80,9 +81,16 @@ export default function FlightDashboard() {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <header className="flex justify-between items-center py-4">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-300">
-          UnionSky
-        </h1>
+        <div className="flex items-center">
+          <Image
+            src="/images/unionsky-logo.png"
+            alt="UnionSky"
+            width={400}
+            height={100}
+            className="h-[100px] w-auto object-contain"
+            priority
+          />
+        </div>
         <div className="text-sm text-gray-400">Live Air Traffic • {new Date().toLocaleTimeString()}</div>
       </header>
 

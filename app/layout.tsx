@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "UnionSky - Live Air Traffic.",
-  description: "Track live air traffic outside my apartment window.",
-    generator: 'Tanish Parsana'
+  title: "UnionSky - Live Air Traffic",
+  description: "Track live air traffic outside your window",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

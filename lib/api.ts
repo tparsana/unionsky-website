@@ -6,7 +6,7 @@ const LAMAX = 33.458656
 const LOMIN = -111.988786
 const LOMAX = -111.917328
 
-// Airline codes mapping (from your Python script)
+// Airline codes mapping (expanded)
 const AIRLINE_CODES: Record<string, string> = {
   SWA: "Southwest Airlines",
   AAL: "American Airlines",
@@ -15,14 +15,166 @@ const AIRLINE_CODES: Record<string, string> = {
   ASA: "Alaska Airlines",
   FFT: "Frontier Airlines",
   JBU: "JetBlue Airways",
-  WN: "Spirit Airlines",
-  HVN: "Hawaiian Airlines",
-  MCO: "Envoy Air",
+  NKS: "Spirit Airlines",
+  HAL: "Hawaiian Airlines",
+  ENY: "Envoy Air",
   SKW: "SkyWest Airlines",
   EJA: "NetJets",
-  MXY: "Breeze Airways",
-  WJA: "WestJet Airline",
-  CFS: "FedEx",
+  BSK: "Breeze Airways",
+  WJA: "WestJet Airlines",
+  FDX: "FedEx Express",
+  UPS: "UPS Airlines",
+  GTI: "Atlas Air",
+  SCX: "Sun Country Airlines",
+  AAY: "Allegiant Air",
+  VRD: "Virgin America",
+  ACA: "Air Canada",
+  AMX: "Aeromexico",
+  BAW: "British Airways",
+  DLH: "Lufthansa",
+  AFR: "Air France",
+  KLM: "KLM Royal Dutch Airlines",
+  UAE: "Emirates",
+  ETH: "Ethiopian Airlines",
+  QTR: "Qatar Airways",
+  CPA: "Cathay Pacific",
+  JAL: "Japan Airlines",
+  ANA: "All Nippon Airways",
+  SIA: "Singapore Airlines",
+  QFA: "Qantas",
+  VOI: "Volaris",
+  VIV: "VivaAerobus",
+  CXP: "Compass Airlines",
+  RPA: "Republic Airways",
+  PDT: "Piedmont Airlines",
+  PSA: "PSA Airlines",
+  AWI: "Air Wisconsin",
+  ASQ: "ExpressJet",
+  JSX: "JSX",
+  GLO: "Gol Transportes Aéreos",
+  TAM: "LATAM Brasil",
+  AVA: "Avianca",
+  CMP: "Copa Airlines",
+  IBE: "Iberia",
+  AZA: "Alitalia",
+  CSN: "China Southern Airlines",
+  CES: "China Eastern Airlines",
+  CCA: "Air China",
+  THY: "Turkish Airlines",
+  KAL: "Korean Air",
+  ASL: "Air Serbia",
+}
+
+// Airport codes mapping
+const AIRPORT_CODES: Record<string, string> = {
+  // Major US Airports
+  ATL: "Atlanta",
+  LAX: "Los Angeles",
+  ORD: "Chicago",
+  DFW: "Dallas/Fort Worth",
+  DEN: "Denver",
+  JFK: "New York",
+  SFO: "San Francisco",
+  SEA: "Seattle",
+  LAS: "Las Vegas",
+  MCO: "Orlando",
+  EWR: "Newark",
+  MIA: "Miami",
+  PHX: "Phoenix",
+  IAH: "Houston",
+  BOS: "Boston",
+  MSP: "Minneapolis",
+  DTW: "Detroit",
+  FLL: "Fort Lauderdale",
+  CLT: "Charlotte",
+  LGA: "New York LaGuardia",
+  BWI: "Baltimore",
+  SLC: "Salt Lake City",
+  DCA: "Washington DC",
+  IAD: "Washington Dulles",
+  SAN: "San Diego",
+  TPA: "Tampa",
+  PDX: "Portland",
+  PHL: "Philadelphia",
+  BNA: "Nashville",
+  AUS: "Austin",
+  STL: "St. Louis",
+  MCI: "Kansas City",
+  OAK: "Oakland",
+  SJC: "San Jose",
+  SMF: "Sacramento",
+  SNA: "Santa Ana",
+  RDU: "Raleigh/Durham",
+  CLE: "Cleveland",
+  MKE: "Milwaukee",
+  PIT: "Pittsburgh",
+  SJU: "San Juan",
+  RSW: "Fort Myers",
+  IND: "Indianapolis",
+  CVG: "Cincinnati",
+  CMH: "Columbus",
+  JAX: "Jacksonville",
+  BUF: "Buffalo",
+  ABQ: "Albuquerque",
+  OMA: "Omaha",
+  OKC: "Oklahoma City",
+  TUL: "Tulsa",
+  BOI: "Boise",
+  ONT: "Ontario",
+  RNO: "Reno",
+  TUS: "Tucson",
+  PVD: "Providence",
+  MEM: "Memphis",
+  MSY: "New Orleans",
+  SAT: "San Antonio",
+  MDW: "Chicago Midway",
+  BDL: "Hartford",
+  DAL: "Dallas Love Field",
+  HOU: "Houston Hobby",
+
+  // International Airports
+  LHR: "London Heathrow",
+  CDG: "Paris",
+  FRA: "Frankfurt",
+  AMS: "Amsterdam",
+  MAD: "Madrid",
+  FCO: "Rome",
+  YYZ: "Toronto",
+  MEX: "Mexico City",
+  YVR: "Vancouver",
+  NRT: "Tokyo",
+  HND: "Tokyo Haneda",
+  ICN: "Seoul",
+  PEK: "Beijing",
+  PVG: "Shanghai",
+  HKG: "Hong Kong",
+  SIN: "Singapore",
+  BKK: "Bangkok",
+  DXB: "Dubai",
+  DOH: "Doha",
+  SYD: "Sydney",
+  MEL: "Melbourne",
+  AKL: "Auckland",
+  GRU: "São Paulo",
+  GIG: "Rio de Janeiro",
+  EZE: "Buenos Aires",
+  SCL: "Santiago",
+  LIM: "Lima",
+  BOG: "Bogotá",
+  JNB: "Johannesburg",
+  CPT: "Cape Town",
+  CAI: "Cairo",
+  IST: "Istanbul",
+  DEL: "Delhi",
+  BOM: "Mumbai",
+  YUL: "Montreal",
+  YYC: "Calgary",
+  YOW: "Ottawa",
+  YHZ: "Halifax",
+  YEG: "Edmonton",
+  CUN: "Cancun",
+  GDL: "Guadalajara",
+  MTY: "Monterrey",
 }
 
 // Get airline name from callsign
@@ -34,12 +186,14 @@ function getAirlineName(callsign: string): string {
   return "Unknown Airline"
 }
 
-// Strip leading K from airport codes
-function stripLeadingK(airportCode: string): string {
-  if (airportCode !== "N/A" && airportCode.length === 4 && airportCode.startsWith("K")) {
-    return airportCode.substring(1)
-  }
-  return airportCode
+// Get airport name from code
+function getAirportName(code: string): string {
+  if (!code || code === "N/A") return "N/A"
+
+  // Strip leading K if present (US airport code format in some systems)
+  const cleanCode = code.startsWith("K") && code.length === 4 ? code.substring(1) : code
+
+  return AIRPORT_CODES[cleanCode] ? `${cleanCode} - ${AIRPORT_CODES[cleanCode]}` : code
 }
 
 // Fetch flight details for a specific aircraft
@@ -70,8 +224,8 @@ async function getFlightDetails(icao24: string): Promise<{ origin: string; desti
     const destination = latestFlight.estArrivalAirport || "N/A"
 
     return {
-      origin: stripLeadingK(origin),
-      destination: stripLeadingK(destination),
+      origin: getAirportName(origin),
+      destination: getAirportName(destination),
     }
   } catch (error) {
     console.error("Error fetching flight details:", error)
