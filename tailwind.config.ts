@@ -56,12 +56,12 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "hover-blue": "hsl(var(--hover-blue))",
-        "hover-purple": "hsl(var(--hover-purple))",
-        "hover-pink": "hsl(var(--hover-pink))",
-        "hover-green": "hsl(var(--hover-green))",
-        "hover-orange": "hsl(var(--hover-orange))",
-        "hover-yellow": "hsl(var(--hover-yellow))",
+        "hover-1": "hsl(var(--hover-1))",
+        "hover-2": "hsl(var(--hover-2))",
+        "hover-3": "hsl(var(--hover-3))",
+        "hover-4": "hsl(var(--hover-4))",
+        "hover-5": "hsl(var(--hover-5))",
+        "hover-6": "hsl(var(--hover-6))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,6 +69,7 @@ const config = {
         sm: "calc(var(--radius) - 8px)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "1.5rem",
       },
       keyframes: {
         "accordion-down": {

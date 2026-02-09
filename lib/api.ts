@@ -1,12 +1,12 @@
 import type { Flight } from "./types"
 
-// OpenSky API coordinates (from your Python script)
+// OpenSky API bounding box coordinates
 const LAMIN = 33.421699
 const LAMAX = 33.458656
 const LOMIN = -111.988786
 const LOMAX = -111.917328
 
-// Airline codes mapping (expanded)
+// Airline codes mapping (from Python script, expanded)
 const AIRLINE_CODES: Record<string, string> = {
   SWA: "Southwest Airlines",
   AAL: "American Airlines",
@@ -51,7 +51,7 @@ const AIRLINE_CODES: Record<string, string> = {
   AWI: "Air Wisconsin",
   ASQ: "ExpressJet",
   JSX: "JSX",
-  GLO: "Gol Transportes Aéreos",
+  GLO: "Gol Transportes Aereos",
   TAM: "LATAM Brasil",
   AVA: "Avianca",
   CMP: "Copa Airlines",
@@ -63,17 +63,18 @@ const AIRLINE_CODES: Record<string, string> = {
   THY: "Turkish Airlines",
   KAL: "Korean Air",
   ASL: "Air Serbia",
+  MXY: "Breeze Airways",
+  MCO: "Envoy Air",
 }
 
 // Airport codes mapping
 const AIRPORT_CODES: Record<string, string> = {
-  // Major US Airports
   ATL: "Atlanta",
   LAX: "Los Angeles",
   ORD: "Chicago",
   DFW: "Dallas/Fort Worth",
   DEN: "Denver",
-  JFK: "New York",
+  JFK: "New York JFK",
   SFO: "San Francisco",
   SEA: "Seattle",
   LAS: "Las Vegas",
@@ -131,8 +132,6 @@ const AIRPORT_CODES: Record<string, string> = {
   BDL: "Hartford",
   DAL: "Dallas Love Field",
   HOU: "Houston Hobby",
-
-  // International Airports
   LHR: "London Heathrow",
   CDG: "Paris",
   FRA: "Frankfurt",
@@ -142,7 +141,7 @@ const AIRPORT_CODES: Record<string, string> = {
   YYZ: "Toronto",
   MEX: "Mexico City",
   YVR: "Vancouver",
-  NRT: "Tokyo",
+  NRT: "Tokyo Narita",
   HND: "Tokyo Haneda",
   ICN: "Seoul",
   PEK: "Beijing",
@@ -155,12 +154,12 @@ const AIRPORT_CODES: Record<string, string> = {
   SYD: "Sydney",
   MEL: "Melbourne",
   AKL: "Auckland",
-  GRU: "São Paulo",
+  GRU: "Sao Paulo",
   GIG: "Rio de Janeiro",
   EZE: "Buenos Aires",
   SCL: "Santiago",
   LIM: "Lima",
-  BOG: "Bogotá",
+  BOG: "Bogota",
   JNB: "Johannesburg",
   CPT: "Cape Town",
   CAI: "Cairo",
@@ -177,7 +176,10 @@ const AIRPORT_CODES: Record<string, string> = {
   MTY: "Monterrey",
 }
 
-// Get airline name from callsign
+/**
+ * Derive the airline name from the first 3 letters of callsign.
+ * Matches Python: get_airline_name(callsign)
+ */
 function getAirlineName(callsign: string): string {
   if (callsign && callsign.length >= 3) {
     const prefix = callsign.substring(0, 3).toUpperCase()
@@ -186,17 +188,36 @@ function getAirlineName(callsign: string): string {
   return "Unknown Airline"
 }
 
-// Get airport name from code
-function getAirportName(code: string): string {
-  if (!code || code === "N/A") return "N/A"
-
-  // Strip leading K if present (US airport code format in some systems)
-  const cleanCode = code.startsWith("K") && code.length === 4 ? code.substring(1) : code
-
-  return AIRPORT_CODES[cleanCode] ? `${cleanCode} - ${AIRPORT_CODES[cleanCode]}` : code
+/**
+ * If the airport code is exactly 4 characters long and starts with 'K',
+ * remove the first character (e.g., 'KSAT' -> 'SAT').
+ * Otherwise, return it as is.
+ * Matches Python: strip_leading_k(airport_code)
+ */
+function stripLeadingK(airportCode: string): string {
+  if (airportCode !== "N/A" && airportCode.length === 4 && airportCode.startsWith("K")) {
+    return airportCode.substring(1)
+  }
+  return airportCode
 }
 
-// Fetch flight details for a specific aircraft
+/**
+ * Get a human-readable airport name with code.
+ * Returns "SNA - Santa Ana" format, or just the code if unknown.
+ */
+function formatAirport(rawCode: string): string {
+  if (!rawCode || rawCode === "N/A") return "N/A"
+  const code = stripLeadingK(rawCode)
+  const name = AIRPORT_CODES[code]
+  return name ? `${code} - ${name}` : code
+}
+
+/**
+ * Retrieve flight data from the last 10 hours for this aircraft.
+ * Sort by 'firstSeen' descending so we pick the most recent flight.
+ * Return (origin, destination) or ("N/A","N/A") if none found.
+ * Matches Python: get_flight_details(icao24)
+ */
 async function getFlightDetails(icao24: string): Promise<{ origin: string; destination: string }> {
   try {
     const now = Math.floor(Date.now() / 1000)
@@ -216,27 +237,31 @@ async function getFlightDetails(icao24: string): Promise<{ origin: string; desti
       return { origin: "N/A", destination: "N/A" }
     }
 
-    // Sort flights by firstSeen (descending) to get the most recent
-    data.sort((a, b) => b.firstSeen - a.firstSeen)
+    // Sort flights by firstSeen descending to get the most recent flight
+    data.sort((a: { firstSeen: number }, b: { firstSeen: number }) => b.firstSeen - a.firstSeen)
     const latestFlight = data[0]
 
-    const origin = latestFlight.estDepartureAirport || "N/A"
-    const destination = latestFlight.estArrivalAirport || "N/A"
+    // Extract raw airport codes
+    const rawOrigin = latestFlight.estDepartureAirport || "N/A"
+    const rawDestination = latestFlight.estArrivalAirport || "N/A"
 
+    // Strip leading K and format with name
     return {
-      origin: getAirportName(origin),
-      destination: getAirportName(destination),
+      origin: formatAirport(rawOrigin),
+      destination: formatAirport(rawDestination),
     }
-  } catch (error) {
-    console.error("Error fetching flight details:", error)
+  } catch {
     return { origin: "N/A", destination: "N/A" }
   }
 }
 
-// Fetch flights from OpenSky API
+/**
+ * Fetch all aircraft states in the bounding box, then enrich each with
+ * origin/destination from the flights/aircraft endpoint.
+ * Matches Python: display_flights()
+ */
 export async function fetchFlights(): Promise<Flight[]> {
   try {
-    // Fetch states from OpenSky API
     const url = `https://opensky-network.org/api/states/all?lamin=${LAMIN}&lamax=${LAMAX}&lomin=${LOMIN}&lomax=${LOMAX}`
     const response = await fetch(url)
 
@@ -250,38 +275,54 @@ export async function fetchFlights(): Promise<Flight[]> {
       return []
     }
 
-    // Transform API response to Flight objects
+    // Parse each state vector exactly like Python's StateVector class
     const flights: Flight[] = await Promise.all(
-      data.states.map(async (state: any[]) => {
-        const icao24 = state[0] || ""
-        const callsign = state[1]?.trim() || "N/A"
+      data.states.map(async (arr: any[]) => {
+        const icao24 = arr[0] || ""
+        const callsign = arr[1]?.trim() || "N/A"
+        const originCountry = arr[2] || "N/A"
+        const timePosition = arr[3] || 0
+        const lastContact = arr[4] || 0
+        const longitude = arr[5] || 0
+        const latitude = arr[6] || 0
+        const geoAltitude = arr[7] || 0
+        const onGround = arr[8] || false
+        const velocity = arr[9] !== null && arr[9] !== undefined ? arr[9] : 0
+        const trueTrack = arr[10] || 0
+        const verticalRate = arr[11] || 0
+        const sensors = arr[12] || []
+        const baroAltitude = arr[13] !== null && arr[13] !== undefined ? arr[13] : 0
+        const squawk = arr[14] || ""
+        const spi = arr[15] || false
+        const positionSource = arr[16] || 0
+
         const airline = getAirlineName(callsign)
 
-        // Get real origin/destination from the API
+        // Get real origin/destination from flights/aircraft endpoint
         const { origin, destination } = await getFlightDetails(icao24)
 
         return {
-          icao24: icao24,
-          callsign: callsign,
-          origin_country: state[2] || "N/A",
-          time_position: state[3] || 0,
-          last_contact: state[4] || 0,
-          longitude: state[5] || 0,
-          latitude: state[6] || 0,
-          geo_altitude: state[7] || 0,
-          on_ground: state[8] || false,
-          velocity: state[9] || 0,
-          true_track: state[10] || 0,
-          vertical_rate: state[11] || 0,
-          sensors: state[12] || [],
-          baro_altitude: state[13] || 0,
-          squawk: state[14] || "",
-          spi: state[15] || false,
-          position_source: state[16] || 0,
-          airline: airline,
-          origin: origin,
-          destination: destination,
-          model: "N/A", // Aircraft model not provided by OpenSky API
+          icao24,
+          callsign,
+          origin_country: originCountry,
+          time_position: timePosition,
+          last_contact: lastContact,
+          longitude,
+          latitude,
+          geo_altitude: geoAltitude,
+          on_ground: onGround,
+          velocity,
+          true_track: trueTrack,
+          vertical_rate: verticalRate,
+          sensors,
+          baro_altitude: baroAltitude,
+          squawk,
+          spi,
+          position_source: positionSource,
+          airline,
+          origin,
+          destination,
+          model: "N/A", // Not provided by OpenSky API
         }
       }),
     )

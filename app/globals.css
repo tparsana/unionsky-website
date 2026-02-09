@@ -5,33 +5,33 @@
 @layer base {
   :root {
     --background: 0 0% 98%;
-    --foreground: 0 0% 12%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
-    --primary: 0 0% 12%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 44%;
+    --muted-foreground: 0 0% 45%;
     --accent: 0 0% 95%;
-    --accent-foreground: 0 0% 12%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 91%;
-    --input: 0 0% 91%;
-    --ring: 0 0% 12%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
     --radius: 1rem;
 
-    /* pastel hover colors */
-    --hover-blue: 213 90% 95%;
-    --hover-purple: 270 80% 95%;
-    --hover-pink: 330 80% 95%;
-    --hover-green: 150 60% 94%;
-    --hover-orange: 30 90% 94%;
-    --hover-yellow: 48 90% 94%;
+    /* greyscale hover tints */
+    --hover-1: 0 0% 96%;
+    --hover-2: 0 0% 94%;
+    --hover-3: 0 0% 92%;
+    --hover-4: 0 0% 93%;
+    --hover-5: 0 0% 95%;
+    --hover-6: 0 0% 91%;
   }
 }
 
@@ -41,15 +41,15 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23a78bfa' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%23a78bfa'/%3E%3C/svg%3E") 10 10, auto;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='none' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, auto;
   }
   a, button, [role="button"], input, textarea, select, [tabindex] {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='%23a78bfa' fill-opacity='0.2' stroke='%23a78bfa' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%23a78bfa'/%3E%3C/svg%3E") 10 10, pointer;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%23222' fill-opacity='0.08' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, pointer;
   }
 }
 
 ::selection {
-  background: hsl(270 80% 90% / 0.5);
+  background: hsl(0 0% 80% / 0.4);
 }
 
 ::-webkit-scrollbar {
@@ -70,7 +70,6 @@
   background: hsl(0 0% 65%);
 }
 
-/* smooth hover transitions */
 .hover-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
