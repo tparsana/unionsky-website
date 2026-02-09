@@ -1,63 +1,67 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-
 export default function LoadingDashboard() {
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <header className="flex justify-between items-center py-4">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-5 w-48" />
+    <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* Header skeleton */}
+      <header className="flex justify-between items-center pb-6 border-b border-border">
+        <div className="h-[100px] w-[250px] rounded bg-secondary animate-pulse" />
+        <div className="h-4 w-32 rounded bg-secondary animate-pulse" />
       </header>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <Skeleton className="h-7 w-36" />
-          <Skeleton className="h-10 w-64 rounded-md" />
+      {/* Stats section skeleton */}
+      <section className="mt-8">
+        <div className="flex items-center justify-between mb-5">
+          <div className="h-5 w-32 rounded bg-secondary animate-pulse" />
+          <div className="h-9 w-64 rounded-md bg-secondary animate-pulse" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array(4)
             .fill(0)
             .map((_, i) => (
-              <Card key={i} className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-                <CardContent className="p-6">
-                  <Skeleton className="h-4 w-24 mb-4" />
-                  <Skeleton className="h-8 w-16" />
-                </CardContent>
-              </Card>
+              <div key={i} className="border border-border rounded-md p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded bg-secondary animate-pulse" />
+                  <div className="h-3 w-16 rounded bg-secondary animate-pulse" />
+                </div>
+                <div className="h-7 w-20 rounded bg-secondary animate-pulse" />
+              </div>
             ))}
         </div>
-      </div>
+      </section>
 
-      <div className="space-y-4">
-        <Skeleton className="h-7 w-36" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Flights section skeleton */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between mb-5">
+          <div className="h-5 w-28 rounded bg-secondary animate-pulse" />
+          <div className="h-6 w-20 rounded bg-secondary animate-pulse" />
+        </div>
+
+        <div className="flex flex-col gap-3">
           {Array(3)
             .fill(0)
             .map((_, i) => (
-              <Card key={i} className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-                <CardContent className="p-6 h-64 flex flex-col gap-4">
-                  <div className="flex justify-between">
-                    <Skeleton className="h-6 w-32" />
-                    <Skeleton className="h-6 w-16" />
+              <div key={i} className="border border-border rounded-md p-4 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded bg-secondary" />
+                  <div className="flex-1">
+                    <div className="h-4 w-32 rounded bg-secondary mb-2" />
+                    <div className="h-3 w-48 rounded bg-secondary" />
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
+                  <div className="hidden sm:flex items-center gap-4">
+                    <div className="h-3 w-14 rounded bg-secondary" />
+                    <div className="h-3 w-14 rounded bg-secondary" />
+                    <div className="h-3 w-6 rounded bg-secondary" />
                   </div>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
         </div>
-      </div>
+      </section>
 
-      <footer className="mt-8 pt-6 border-t border-indigo-900/30 text-center">
-        <Skeleton className="h-4 w-80 mx-auto mb-2" />
-        <Skeleton className="h-3 w-64 mx-auto" />
+      {/* Footer skeleton */}
+      <footer className="mt-12 pt-6 border-t border-border text-center">
+        <div className="h-4 w-80 rounded bg-secondary animate-pulse mx-auto mb-2" />
+        <div className="h-3 w-56 rounded bg-secondary animate-pulse mx-auto" />
       </footer>
     </div>
   )

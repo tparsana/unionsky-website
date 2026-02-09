@@ -1,34 +1,41 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import type { Airline } from "@/lib/types"
+import { Plane } from "lucide-react"
 
 export default function FlightAirlines({ airlines }: { airlines: Airline[] }) {
-  // Sort airlines by count (descending)
   const sortedAirlines = [...airlines].sort((a, b) => b.count - a.count)
   const maxCount = sortedAirlines.length > 0 ? sortedAirlines[0].count : 1
 
   return (
-    <div className="space-y-4">
+    <div className="border border-border rounded-md divide-y divide-border">
       {sortedAirlines.length > 0 ? (
         sortedAirlines.map((airline) => (
-          <Card key={airline.name} className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">{airline.name}</h3>
-                <span className="text-indigo-300 font-semibold">{airline.count}</span>
+          <div
+            key={airline.name}
+            className="flex items-center gap-4 px-4 py-3 hover:bg-secondary/50 transition-colors"
+          >
+            <div className="w-7 h-7 rounded bg-secondary flex items-center justify-center shrink-0">
+              <Plane className="w-3.5 h-3.5 text-muted-foreground" />
+            </div>
+            <span className="text-sm font-medium text-foreground flex-1 min-w-0 truncate">
+              {airline.name}
+            </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-32 h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-foreground/30 transition-all"
+                  style={{ width: `${(airline.count / maxCount) * 100}%` }}
+                />
               </div>
-              <Progress
-                value={(airline.count / maxCount) * 100}
-                className="h-2 bg-indigo-950"
-                indicatorClassName="bg-gradient-to-r from-indigo-500 to-purple-500"
-              />
-            </CardContent>
-          </Card>
+              <span className="text-sm font-medium text-muted-foreground tabular-nums w-6 text-right">
+                {airline.count}
+              </span>
+            </div>
+          </div>
         ))
       ) : (
-        <Card className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-          <CardContent className="p-6 text-center text-gray-400">No airline data available</CardContent>
-        </Card>
+        <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+          No airline data available
+        </div>
       )}
     </div>
   )

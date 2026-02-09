@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { Plane, BarChart3, Clock, Globe } from "lucide-react"
+import { BarChart3, Clock, Plane, Radio } from "lucide-react"
 import FlightOverview from "@/components/flight-overview"
 import FlightAirlines from "@/components/flight-airlines"
 import FlightHistory from "@/components/flight-history"
@@ -26,6 +25,7 @@ export default function FlightDashboard() {
   })
   const [activeTab, setActiveTab] = useState("overview")
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,14 +33,13 @@ export default function FlightDashboard() {
       try {
         const data = await fetchFlights()
         setFlights(data)
+        setLastUpdated(new Date())
 
-        // Calculate stats
         const uniqueCountries = new Set(data.map((f) => f.origin_country))
         const uniqueAirlines = new Set(data.map((f) => f.airline))
         const avgAlt = data.reduce((sum, f) => sum + f.baro_altitude, 0) / (data.length || 1)
         const avgSpd = data.reduce((sum, f) => sum + f.velocity, 0) / (data.length || 1)
 
-        // Update stats
         setStats((prev) => {
           const newHistory = [...prev.history]
           if (data.length > 0) {
@@ -73,97 +72,138 @@ export default function FlightDashboard() {
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 30000) // Refresh every 30 seconds
-
+    const interval = setInterval(fetchData, 30000)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <header className="flex justify-between items-center py-4">
-        <div className="flex items-center">
+    <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* Header */}
+      <header className="flex items-center justify-between pb-6 border-b border-border">
+        <div className="flex items-center gap-3">
           <Image
             src="/images/unionsky-logo.png"
             alt="UnionSky"
             width={400}
             height={100}
-            className="h-[100px] w-auto object-contain"
+            className="h-[100px] w-auto object-contain invert"
             priority
           />
         </div>
-        <div className="text-sm text-gray-400">Live Air Traffic • {new Date().toLocaleTimeString()}</div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Radio className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+          <span>Live</span>
+          {lastUpdated && (
+            <>
+              <span className="text-border">|</span>
+              <span>{lastUpdated.toLocaleTimeString()}</span>
+            </>
+          )}
+        </div>
       </header>
 
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Flight Statistics</h2>
-          <TabsList className="bg-black/50 backdrop-blur-sm">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600">
-              <BarChart3 className="w-4 h-4 mr-2" /> Overview
-            </TabsTrigger>
-            <TabsTrigger value="airlines" className="data-[state=active]:bg-indigo-600">
-              <Plane className="w-4 h-4 mr-2" /> Airlines
-            </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-indigo-600">
-              <Clock className="w-4 h-4 mr-2" /> History
-            </TabsTrigger>
-          </TabsList>
+      {/* Statistics Section */}
+      <section className="mt-8">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold text-foreground">Flight Statistics</h2>
+            <TabsList className="bg-secondary">
+              <TabsTrigger
+                value="overview"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground"
+              >
+                <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="airlines"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground"
+              >
+                <Plane className="w-3.5 h-3.5 mr-1.5" />
+                Airlines
+              </TabsTrigger>
+              <TabsTrigger
+                value="history"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground"
+              >
+                <Clock className="w-3.5 h-3.5 mr-1.5" />
+                History
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="overview" className="mt-0">
+            <FlightOverview stats={stats} />
+          </TabsContent>
+          <TabsContent value="airlines" className="mt-0">
+            <FlightAirlines airlines={stats.airlines} />
+          </TabsContent>
+          <TabsContent value="history" className="mt-0">
+            <FlightHistory stats={stats} />
+          </TabsContent>
+        </Tabs>
+      </section>
+
+      {/* Flights In View */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-semibold text-foreground">Flights In View</h2>
+          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
+            {flights.length} aircraft
+          </span>
         </div>
 
-        <TabsContent value="overview" className="mt-0">
-          <FlightOverview stats={stats} />
-        </TabsContent>
-
-        <TabsContent value="airlines" className="mt-0">
-          <FlightAirlines airlines={stats.airlines} />
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-0">
-          <FlightHistory stats={stats} />
-        </TabsContent>
-      </Tabs>
-
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Flights In View</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           {loading ? (
             Array(3)
               .fill(0)
               .map((_, i) => (
-                <Card key={i} className="bg-black/50 backdrop-blur-sm border-indigo-900/50 animate-pulse h-64">
-                  <CardContent className="p-6"></CardContent>
-                </Card>
+                <div
+                  key={i}
+                  className="border border-border rounded-md p-5 animate-pulse"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded bg-secondary" />
+                    <div className="flex-1">
+                      <div className="h-4 w-28 rounded bg-secondary mb-2" />
+                      <div className="h-3 w-40 rounded bg-secondary" />
+                    </div>
+                  </div>
+                </div>
               ))
           ) : flights.length > 0 ? (
             flights.map((flight) => <FlightsInView key={flight.icao24} flight={flight} />)
           ) : (
-            <Card className="bg-black/50 backdrop-blur-sm border-indigo-900/50 col-span-full">
-              <CardContent className="p-6 flex flex-col items-center justify-center h-64">
-                <Globe className="w-16 h-16 text-indigo-400 mb-4 opacity-50" />
-                <p className="text-center text-gray-400">No flights currently in view</p>
-                <p className="text-center text-gray-500 text-sm mt-2">
-                  Waiting for aircraft to enter your viewing area...
-                </p>
-              </CardContent>
-            </Card>
+            <div className="border border-dashed border-border rounded-md py-16 flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mb-3">
+                <Plane className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground">No flights currently in view</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Waiting for aircraft to enter your viewing area...
+              </p>
+            </div>
           )}
         </div>
       </section>
 
-      <footer className="mt-8 pt-6 border-t border-indigo-900/30 text-center text-sm text-gray-400">
-        <p>
+      {/* Footer */}
+      <footer className="mt-12 pt-6 border-t border-border text-center">
+        <p className="text-sm text-muted-foreground">
           UnionSky Viewfinder · Created with ♥ by{" "}
           <a
             href="https://solo.to/tparsana"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300"
+            className="text-foreground underline decoration-border underline-offset-2 hover:decoration-foreground transition-colors"
           >
             Tanish Parsana
           </a>{" "}
           · Using OpenSky Network API
         </p>
-        <p className="mt-1 text-gray-500">Data refreshes automatically every 30 seconds</p>
+        <p className="mt-1.5 text-xs text-muted-foreground/70">
+          Data refreshes automatically every 30 seconds
+        </p>
       </footer>
     </div>
   )

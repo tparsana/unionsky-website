@@ -1,117 +1,136 @@
 "use client"
 
+import React from "react"
+
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import type { Flight } from "@/lib/types"
-import { Plane, ChevronDown, ChevronUp, MapPin, Globe, PlaneIcon } from "lucide-react"
+import {
+  Plane,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Globe,
+  ArrowUp,
+  Gauge,
+  Compass,
+  Radio,
+  Hash,
+  ArrowUpDown,
+  Mountain,
+} from "lucide-react"
 
 export default function FlightsInView({ flight }: { flight: Flight }) {
   const [expanded, setExpanded] = useState(false)
 
+  const direction = flight.true_track
+    ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][
+        Math.floor(((flight.true_track % 360) + 22.5) / 45) % 8
+      ]
+    : "N/A"
+
   return (
-    <Card className="bg-black/50 backdrop-blur-sm border-indigo-900/50 overflow-hidden">
-      <CardContent className="p-0">
-        <div className="p-4 border-b border-indigo-900/30 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-900/50 p-2 rounded-md">
-              <Plane className="w-5 h-5 text-indigo-300" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg">{flight.callsign}</h3>
-              <p className="text-sm text-gray-400">{flight.airline}</p>
-            </div>
-          </div>
-          <div className="px-3 py-1 rounded-full bg-indigo-900/30 text-indigo-300 text-xs font-medium">In Air</div>
+    <div className="border border-border rounded-md overflow-hidden hover:shadow-sm transition-shadow">
+      {/* Main row - always visible */}
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-secondary/30 transition-colors text-left"
+      >
+        <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center shrink-0">
+          <Plane className="w-4 h-4 text-muted-foreground" />
         </div>
 
-        <div className="p-4 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-xs text-gray-400">Altitude</p>
-            <p className="font-semibold mt-1">{Math.round(flight.baro_altitude)} ft</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">{flight.callsign}</span>
+            <span className="text-xs text-muted-foreground">{flight.airline}</span>
           </div>
-          <div>
-            <p className="text-xs text-gray-400">Speed</p>
-            <p className="font-semibold mt-1">{Math.round(flight.velocity)} km/h</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Direction</p>
-            <p className="font-semibold mt-1">
-              {flight.true_track
-                ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.floor(((flight.true_track % 360) + 22.5) / 45) % 8]
-                : "N/A"}
-            </p>
+          <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+            <span>{flight.origin}</span>
+            <span className="text-border">{'-->'}</span>
+            <span>{flight.destination}</span>
           </div>
         </div>
 
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <Globe className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Country: <span className="text-indigo-300">{flight.origin_country}</span>
-          </p>
+        {/* Quick stats */}
+        <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+          <span className="tabular-nums">{Math.round(flight.baro_altitude).toLocaleString()} ft</span>
+          <span className="tabular-nums">{Math.round(flight.velocity)} km/h</span>
+          <span>{direction}</span>
         </div>
 
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Origin: <span className="text-indigo-300">{flight.origin}</span>
-          </p>
+        <div className="shrink-0 text-muted-foreground">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
+      </button>
 
-        <div className="px-4 pb-4 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Destination: <span className="text-indigo-300">{flight.destination}</span>
-          </p>
-        </div>
-
-        {expanded && (
-          <div className="px-4 pb-4 pt-2 border-t border-indigo-900/30 space-y-2">
-            <div className="flex items-center gap-2">
-              <PlaneIcon className="w-4 h-4 text-gray-400" />
-              <p className="text-sm">
-                Aircraft: <span className="text-indigo-300">{flight.model || "N/A"}</span>
+      {/* Expanded details */}
+      {expanded && (
+        <div className="border-t border-border bg-secondary/20">
+          {/* Key metrics */}
+          <div className="grid grid-cols-3 divide-x divide-border border-b border-border">
+            <div className="px-4 py-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <ArrowUp className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Altitude</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground tabular-nums">
+                {Math.round(flight.baro_altitude).toLocaleString()} ft
               </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-400">ICAO24</p>
-                <p className="font-mono text-sm">{flight.icao24}</p>
+            <div className="px-4 py-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Gauge className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Speed</span>
               </div>
-              <div>
-                <p className="text-xs text-gray-400">Squawk</p>
-                <p className="font-mono text-sm">{flight.squawk || "N/A"}</p>
+              <p className="text-sm font-semibold text-foreground tabular-nums">
+                {Math.round(flight.velocity)} km/h
+              </p>
+            </div>
+            <div className="px-4 py-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Compass className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Heading</span>
               </div>
-              <div>
-                <p className="text-xs text-gray-400">Vertical Rate</p>
-                <p className="font-mono text-sm">{flight.vertical_rate || 0} m/s</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Geo Altitude</p>
-                <p className="font-mono text-sm">{flight.geo_altitude || "N/A"} ft</p>
-              </div>
+              <p className="text-sm font-semibold text-foreground tabular-nums">
+                {direction} ({Math.round(flight.true_track || 0)}°)
+              </p>
             </div>
           </div>
-        )}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full flex items-center justify-center py-2 text-gray-400 hover:text-white hover:bg-indigo-900/30"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? (
-            <>
-              <ChevronUp className="w-4 h-4 mr-1" /> Less details
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-4 h-4 mr-1" /> More details
-            </>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+          {/* Properties list */}
+          <div className="grid grid-cols-2 text-sm">
+            <Property icon={Globe} label="Country" value={flight.origin_country} />
+            <Property icon={MapPin} label="Origin" value={flight.origin} />
+            <Property icon={MapPin} label="Destination" value={flight.destination} />
+            <Property icon={Plane} label="Aircraft" value={flight.model || "N/A"} />
+            <Property icon={Radio} label="ICAO24" value={flight.icao24} mono />
+            <Property icon={Hash} label="Squawk" value={flight.squawk || "N/A"} mono />
+            <Property icon={ArrowUpDown} label="Vertical Rate" value={`${flight.vertical_rate || 0} m/s`} />
+            <Property icon={Mountain} label="Geo Altitude" value={`${flight.geo_altitude || "N/A"} ft`} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Property({
+  icon: Icon,
+  label,
+  value,
+  mono = false,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+  mono?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors">
+      <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+      <span className="text-muted-foreground text-xs shrink-0">{label}</span>
+      <span className={`text-foreground text-xs truncate ${mono ? "font-mono" : ""}`}>{value}</span>
+    </div>
   )
 }
