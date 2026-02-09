@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -53,11 +56,20 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "hover-1": "hsl(var(--hover-1))",
+        "hover-2": "hsl(var(--hover-2))",
+        "hover-3": "hsl(var(--hover-3))",
+        "hover-4": "hsl(var(--hover-4))",
+        "hover-5": "hsl(var(--hover-5))",
+        "hover-6": "hsl(var(--hover-6))",
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "1.5rem",
       },
       keyframes: {
         "accordion-down": {
@@ -68,10 +80,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
     },
   },

@@ -4,7 +4,7 @@ import LoadingDashboard from "@/components/loading-dashboard"
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-background text-foreground">
       <Suspense fallback={<LoadingDashboard />}>
         <FlightDashboard />
       </Suspense>

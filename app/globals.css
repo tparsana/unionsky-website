@@ -4,48 +4,34 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 252 59% 48%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 252 59% 48%;
-    --radius: 0.5rem;
-  }
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
+    --radius: 1rem;
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 252 59% 54%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 252 59% 54%;
+    /* greyscale hover tints */
+    --hover-1: 0 0% 96%;
+    --hover-2: 0 0% 94%;
+    --hover-3: 0 0% 92%;
+    --hover-4: 0 0% 93%;
+    --hover-5: 0 0% 95%;
+    --hover-6: 0 0% 91%;
   }
 }
 
@@ -54,25 +40,40 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='none' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, auto;
+  }
+  a, button, [role="button"], input, textarea, select, [tabindex] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%23222' fill-opacity='0.08' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, pointer;
   }
 }
 
+::selection {
+  background: hsl(0 0% 80% / 0.4);
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 12, 41, 0.5);
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
-  border-radius: 4px;
+  background: hsl(0 0% 80%);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+  background: hsl(0 0% 65%);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }

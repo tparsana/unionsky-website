@@ -1,117 +1,173 @@
 "use client"
 
+import React from "react"
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import type { Flight } from "@/lib/types"
-import { Plane, ChevronDown, ChevronUp, MapPin, Globe, PlaneIcon } from "lucide-react"
+import {
+  Plane,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Globe,
+  ArrowUp,
+  Gauge,
+  Compass,
+  Radio,
+  Hash,
+  ArrowUpDown,
+  Mountain,
+  ArrowRight,
+} from "lucide-react"
 
-export default function FlightsInView({ flight }: { flight: Flight }) {
+const PASTEL_COLORS = [
+  { bg: "bg-hover-purple", accent: "text-violet-600", ring: "ring-violet-200" },
+  { bg: "bg-hover-blue", accent: "text-blue-600", ring: "ring-blue-200" },
+  { bg: "bg-hover-pink", accent: "text-pink-600", ring: "ring-pink-200" },
+  { bg: "bg-hover-green", accent: "text-emerald-600", ring: "ring-emerald-200" },
+  { bg: "bg-hover-orange", accent: "text-orange-600", ring: "ring-orange-200" },
+  { bg: "bg-hover-yellow", accent: "text-amber-600", ring: "ring-amber-200" },
+]
+
+export default function FlightsInView({ flight, colorIndex = 0 }: { flight: Flight; colorIndex?: number }) {
   const [expanded, setExpanded] = useState(false)
+  const color = PASTEL_COLORS[colorIndex % PASTEL_COLORS.length]
+
+  const direction = flight.true_track
+    ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][
+        Math.floor(((flight.true_track % 360) + 22.5) / 45) % 8
+      ]
+    : "N/A"
+
+  const statusLabel = flight.on_ground ? "On Ground" : "In Air"
+  const statusColor = flight.on_ground
+    ? "bg-hover-orange text-orange-700"
+    : "bg-hover-green text-emerald-700"
 
   return (
-    <Card className="bg-black/50 backdrop-blur-sm border-indigo-900/50 overflow-hidden">
-      <CardContent className="p-0">
-        <div className="p-4 border-b border-indigo-900/30 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-900/50 p-2 rounded-md">
-              <Plane className="w-5 h-5 text-indigo-300" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg">{flight.callsign}</h3>
-              <p className="text-sm text-gray-400">{flight.airline}</p>
-            </div>
+    <div className={`bg-card border border-border rounded-2xl overflow-hidden hover-lift ${expanded ? "ring-2 " + color.ring : ""}`}>
+      {/* Main row */}
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className={`w-full flex items-center gap-4 px-5 py-4 transition-colors text-left ${expanded ? color.bg : "hover:bg-secondary/50"}`}
+      >
+        <div className={`w-12 h-12 rounded-xl ${color.bg} flex items-center justify-center shrink-0`}>
+          <Plane className={`w-5 h-5 ${color.accent}`} />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span className="text-base font-bold text-foreground tracking-tight">{flight.callsign}</span>
+            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}`}>
+              {statusLabel}
+            </span>
           </div>
-          <div className="px-3 py-1 rounded-full bg-indigo-900/30 text-indigo-300 text-xs font-medium">In Air</div>
+          <p className="text-sm text-muted-foreground mt-0.5">{flight.airline}</p>
         </div>
 
-        <div className="p-4 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-xs text-gray-400">Altitude</p>
-            <p className="font-semibold mt-1">{Math.round(flight.baro_altitude)} ft</p>
+        {/* Route pill */}
+        <div className="hidden sm:flex items-center gap-2 bg-secondary px-4 py-2 rounded-full shrink-0">
+          <span className="text-sm font-medium text-foreground">{flight.origin !== "N/A" ? flight.origin.split(" - ")[0] : "---"}</span>
+          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-sm font-medium text-foreground">{flight.destination !== "N/A" ? flight.destination.split(" - ")[0] : "---"}</span>
+        </div>
+
+        <div className="shrink-0 text-muted-foreground ml-2">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </button>
+
+      {/* Expanded details */}
+      {expanded && (
+        <div className="border-t border-border">
+          {/* Key metrics row */}
+          <div className="grid grid-cols-3 gap-4 p-5">
+            <MetricCard
+              icon={ArrowUp}
+              label="Altitude"
+              value={`${Math.round(flight.baro_altitude).toLocaleString()} ft`}
+              bgColor="bg-hover-blue"
+              iconColor="text-blue-600"
+            />
+            <MetricCard
+              icon={Gauge}
+              label="Speed"
+              value={`${Math.round(flight.velocity)} km/h`}
+              bgColor="bg-hover-green"
+              iconColor="text-emerald-600"
+            />
+            <MetricCard
+              icon={Compass}
+              label="Heading"
+              value={`${direction} (${Math.round(flight.true_track || 0)}°)`}
+              bgColor="bg-hover-purple"
+              iconColor="text-violet-600"
+            />
           </div>
-          <div>
-            <p className="text-xs text-gray-400">Speed</p>
-            <p className="font-semibold mt-1">{Math.round(flight.velocity)} km/h</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Direction</p>
-            <p className="font-semibold mt-1">
-              {flight.true_track
-                ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.floor(((flight.true_track % 360) + 22.5) / 45) % 8]
-                : "N/A"}
-            </p>
-          </div>
-        </div>
 
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <Globe className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Country: <span className="text-indigo-300">{flight.origin_country}</span>
-          </p>
-        </div>
-
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Origin: <span className="text-indigo-300">{flight.origin}</span>
-          </p>
-        </div>
-
-        <div className="px-4 pb-4 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <p className="text-sm">
-            Destination: <span className="text-indigo-300">{flight.destination}</span>
-          </p>
-        </div>
-
-        {expanded && (
-          <div className="px-4 pb-4 pt-2 border-t border-indigo-900/30 space-y-2">
-            <div className="flex items-center gap-2">
-              <PlaneIcon className="w-4 h-4 text-gray-400" />
-              <p className="text-sm">
-                Aircraft: <span className="text-indigo-300">{flight.model || "N/A"}</span>
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-400">ICAO24</p>
-                <p className="font-mono text-sm">{flight.icao24}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Squawk</p>
-                <p className="font-mono text-sm">{flight.squawk || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Vertical Rate</p>
-                <p className="font-mono text-sm">{flight.vertical_rate || 0} m/s</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Geo Altitude</p>
-                <p className="font-mono text-sm">{flight.geo_altitude || "N/A"} ft</p>
+          {/* Properties grid */}
+          <div className="px-5 pb-5">
+            <div className="bg-secondary/50 rounded-xl overflow-hidden">
+              <div className="grid grid-cols-2">
+                <Property icon={Globe} label="Country" value={flight.origin_country} hoverColor="hover:bg-hover-blue" />
+                <Property icon={Plane} label="Aircraft" value={flight.model || "N/A"} hoverColor="hover:bg-hover-purple" />
+                <Property icon={MapPin} label="Origin" value={flight.origin} hoverColor="hover:bg-hover-green" />
+                <Property icon={MapPin} label="Destination" value={flight.destination} hoverColor="hover:bg-hover-pink" />
+                <Property icon={Radio} label="ICAO24" value={flight.icao24} mono hoverColor="hover:bg-hover-orange" />
+                <Property icon={Hash} label="Squawk" value={flight.squawk || "N/A"} mono hoverColor="hover:bg-hover-yellow" />
+                <Property icon={ArrowUpDown} label="Vertical Rate" value={`${flight.vertical_rate || 0} m/s`} hoverColor="hover:bg-hover-blue" />
+                <Property icon={Mountain} label="Geo Altitude" value={`${flight.geo_altitude || "N/A"} ft`} hoverColor="hover:bg-hover-green" />
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
+    </div>
+  )
+}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full flex items-center justify-center py-2 text-gray-400 hover:text-white hover:bg-indigo-900/30"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? (
-            <>
-              <ChevronUp className="w-4 h-4 mr-1" /> Less details
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-4 h-4 mr-1" /> More details
-            </>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  bgColor,
+  iconColor,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+  bgColor: string
+  iconColor: string
+}) {
+  return (
+    <div className={`${bgColor} rounded-xl p-4 text-center hover-lift`}>
+      <div className="flex items-center justify-center gap-1.5 mb-2">
+        <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
+        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
+      </div>
+      <p className="text-lg font-bold text-foreground tabular-nums">{value}</p>
+    </div>
+  )
+}
+
+function Property({
+  icon: Icon,
+  label,
+  value,
+  mono = false,
+  hoverColor = "hover:bg-hover-blue",
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+  mono?: boolean
+  hoverColor?: string
+}) {
+  return (
+    <div className={`flex items-center gap-3 px-4 py-3 border-b border-border/50 last:border-b-0 ${hoverColor} transition-colors rounded-sm`}>
+      <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+      <span className="text-muted-foreground text-xs font-medium shrink-0 w-20">{label}</span>
+      <span className={`text-foreground text-sm truncate ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
+    </div>
   )
 }

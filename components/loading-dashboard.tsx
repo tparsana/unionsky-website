@@ -1,63 +1,75 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-
 export default function LoadingDashboard() {
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <header className="flex justify-between items-center py-4">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-5 w-48" />
+    <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* Header skeleton */}
+      <header className="flex justify-between items-center pb-6">
+        <div className="h-[100px] w-[250px] rounded-2xl bg-secondary animate-pulse" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-20 rounded-full bg-hover-green animate-pulse" />
+          <div className="h-9 w-28 rounded-full bg-secondary animate-pulse" />
+        </div>
       </header>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <Skeleton className="h-7 w-36" />
-          <Skeleton className="h-10 w-64 rounded-md" />
+      {/* Flights section skeleton */}
+      <section className="mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-hover-purple animate-pulse" />
+            <div>
+              <div className="h-5 w-32 rounded-lg bg-secondary animate-pulse mb-1.5" />
+              <div className="h-3 w-44 rounded-lg bg-secondary animate-pulse" />
+            </div>
+          </div>
+          <div className="h-8 w-24 rounded-full bg-hover-blue animate-pulse" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array(4)
-            .fill(0)
-            .map((_, i) => (
-              <Card key={i} className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-                <CardContent className="p-6">
-                  <Skeleton className="h-4 w-24 mb-4" />
-                  <Skeleton className="h-8 w-16" />
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <Skeleton className="h-7 w-36" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-3">
           {Array(3)
             .fill(0)
             .map((_, i) => (
-              <Card key={i} className="bg-black/50 backdrop-blur-sm border-indigo-900/50">
-                <CardContent className="p-6 h-64 flex flex-col gap-4">
-                  <div className="flex justify-between">
-                    <Skeleton className="h-6 w-32" />
-                    <Skeleton className="h-6 w-16" />
+              <div key={i} className="bg-card border border-border rounded-2xl p-6 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-secondary" />
+                  <div className="flex-1">
+                    <div className="h-5 w-36 rounded-lg bg-secondary mb-2" />
+                    <div className="h-3.5 w-52 rounded-lg bg-secondary" />
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                </CardContent>
-              </Card>
+                  <div className="hidden sm:block h-9 w-32 rounded-full bg-secondary" />
+                </div>
+              </div>
             ))}
         </div>
-      </div>
+      </section>
 
-      <footer className="mt-8 pt-6 border-t border-indigo-900/30 text-center">
-        <Skeleton className="h-4 w-80 mx-auto mb-2" />
-        <Skeleton className="h-3 w-64 mx-auto" />
+      {/* Stats section skeleton */}
+      <section className="mt-12">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-hover-blue animate-pulse" />
+            <div className="h-5 w-36 rounded-lg bg-secondary animate-pulse" />
+          </div>
+          <div className="h-10 w-72 rounded-full bg-secondary animate-pulse" />
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-secondary animate-pulse" />
+                  <div className="h-3 w-16 rounded-lg bg-secondary animate-pulse" />
+                </div>
+                <div className="h-8 w-24 rounded-lg bg-secondary animate-pulse" />
+              </div>
+            ))}
+        </div>
+      </section>
+
+      {/* Footer skeleton */}
+      <footer className="mt-16 pt-6 border-t border-border text-center">
+        <div className="h-4 w-80 rounded-lg bg-secondary animate-pulse mx-auto mb-2.5" />
+        <div className="h-3 w-56 rounded-lg bg-secondary animate-pulse mx-auto" />
       </footer>
     </div>
   )
