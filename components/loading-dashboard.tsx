@@ -1,76 +1,80 @@
 export default function LoadingDashboard() {
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
-      {/* Header skeleton */}
-      <header className="flex justify-between items-center pb-6">
-        <div className="h-[100px] w-[250px] rounded-2xl bg-secondary animate-pulse" />
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-20 rounded-full bg-hover-green animate-pulse" />
-          <div className="h-9 w-28 rounded-full bg-secondary animate-pulse" />
-        </div>
-      </header>
+    <div className="mx-auto w-full max-w-[92rem] px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
+      <section className="rounded-[2rem] bg-primary px-5 pb-16 pt-5 sm:px-8 sm:pb-20 sm:pt-7 lg:px-10">
+        <header className="flex items-center justify-between">
+          <div className="h-10 w-32 rounded-lg bg-white/20 animate-pulse" />
+          <div className="flex gap-2">
+            <div className="h-9 w-16 rounded-full bg-white/20 animate-pulse sm:w-20" />
+            <div className="h-9 w-24 rounded-full bg-white/20 animate-pulse sm:w-32" />
+          </div>
+        </header>
 
-      {/* Flights section skeleton */}
-      <section className="mt-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-hover-purple animate-pulse" />
-            <div>
-              <div className="h-5 w-32 rounded-lg bg-secondary animate-pulse mb-1.5" />
-              <div className="h-3 w-44 rounded-lg bg-secondary animate-pulse" />
+        <div className="mt-8 lg:mt-10">
+          <div className="mb-3 h-3 w-44 rounded-full bg-white/20 animate-pulse" />
+          <div className="h-12 w-[640px] max-w-full rounded-xl bg-white/20 animate-pulse" />
+        </div>
+      </section>
+
+      <section className="-mt-6 rounded-[2rem] border border-border bg-card px-4 pb-8 pt-10 sm:-mt-8 sm:px-7 sm:pb-10 sm:pt-12 lg:px-10">
+        <section>
+          <div className="mb-4 flex items-end justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-muted animate-pulse" />
+              <div>
+                <div className="mb-2 h-5 w-36 rounded-lg bg-muted animate-pulse" />
+                <div className="h-4 w-52 rounded-lg bg-muted animate-pulse" />
+              </div>
             </div>
+            <div className="h-8 w-24 rounded-full bg-muted animate-pulse" />
           </div>
-          <div className="h-8 w-24 rounded-full bg-hover-blue animate-pulse" />
-        </div>
 
-        <div className="flex flex-col gap-3">
-          {Array(3)
-            .fill(0)
-            .map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl p-6 animate-pulse">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-secondary" />
-                  <div className="flex-1">
-                    <div className="h-5 w-36 rounded-lg bg-secondary mb-2" />
-                    <div className="h-3.5 w-52 rounded-lg bg-secondary" />
+          <div className="flex flex-col gap-3">
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border bg-background/80 p-5 sm:p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-muted animate-pulse" />
+                    <div className="flex-1">
+                      <div className="mb-2 h-5 w-36 rounded-lg bg-muted animate-pulse" />
+                      <div className="h-3.5 w-52 rounded-lg bg-muted animate-pulse" />
+                    </div>
                   </div>
-                  <div className="hidden sm:block h-9 w-32 rounded-full bg-secondary" />
                 </div>
-              </div>
-            ))}
-        </div>
-      </section>
-
-      {/* Stats section skeleton */}
-      <section className="mt-12">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-hover-blue animate-pulse" />
-            <div className="h-5 w-36 rounded-lg bg-secondary animate-pulse" />
+              ))}
           </div>
-          <div className="h-10 w-72 rounded-full bg-secondary animate-pulse" />
-        </div>
+        </section>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {Array(4)
-            .fill(0)
-            .map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl p-5">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-secondary animate-pulse" />
-                  <div className="h-3 w-16 rounded-lg bg-secondary animate-pulse" />
+        <section className="mt-10 border-t border-border pt-10">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-8 w-52 rounded-lg bg-muted animate-pulse" />
+            </div>
+            <div className="h-10 w-full max-w-[360px] rounded-full bg-muted animate-pulse" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {Array(4)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border p-5">
+                  <div className="mb-3 flex items-center gap-2.5">
+                    <div className="h-9 w-9 rounded-xl bg-muted animate-pulse" />
+                    <div className="h-3 w-20 rounded-lg bg-muted animate-pulse" />
+                  </div>
+                  <div className="h-10 w-28 rounded-lg bg-muted animate-pulse" />
                 </div>
-                <div className="h-8 w-24 rounded-lg bg-secondary animate-pulse" />
-              </div>
-            ))}
-        </div>
-      </section>
+              ))}
+          </div>
+        </section>
 
-      {/* Footer skeleton */}
-      <footer className="mt-16 pt-6 border-t border-border text-center">
-        <div className="h-4 w-80 rounded-lg bg-secondary animate-pulse mx-auto mb-2.5" />
-        <div className="h-3 w-56 rounded-lg bg-secondary animate-pulse mx-auto" />
-      </footer>
+        <footer className="mt-10 border-t border-border pt-6">
+          <div className="mx-auto h-4 w-80 max-w-full rounded-lg bg-muted animate-pulse" />
+          <div className="mx-auto mt-2.5 h-3 w-56 max-w-full rounded-lg bg-muted animate-pulse" />
+        </footer>
+      </section>
     </div>
   )
 }

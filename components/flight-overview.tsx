@@ -2,10 +2,10 @@ import type { FlightStats } from "@/lib/types"
 import { Plane, ArrowUp, Gauge, Globe } from "lucide-react"
 
 const statCards = [
-  { key: "totalFlights", label: "Total Flights", icon: Plane, color: "bg-hover-purple", iconColor: "text-violet-600" },
-  { key: "avgAltitude", label: "Avg. Altitude", icon: ArrowUp, color: "bg-hover-blue", iconColor: "text-blue-600", format: (v: number) => `${Math.round(v).toLocaleString()} ft` },
-  { key: "avgSpeed", label: "Avg. Speed", icon: Gauge, color: "bg-hover-green", iconColor: "text-emerald-600", format: (v: number) => `${Math.round(v)} km/h` },
-  { key: "countries", label: "Countries", icon: Globe, color: "bg-hover-orange", iconColor: "text-orange-600" },
+  { key: "totalFlights", label: "Sightings", icon: Plane },
+  { key: "avgAltitude", label: "Typical Altitude", icon: ArrowUp, format: (v: number) => `${Math.round(v).toLocaleString()} ft` },
+  { key: "avgSpeed", label: "Typical Speed", icon: Gauge, format: (v: number) => `${Math.round(v)} km/h` },
+  { key: "countries", label: "Origins", icon: Globe },
 ] as const
 
 export default function FlightOverview({ stats }: { stats: FlightStats }) {
@@ -17,21 +17,23 @@ export default function FlightOverview({ stats }: { stats: FlightStats }) {
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {statCards.map(({ key, label, icon: Icon, color, iconColor, ...rest }) => {
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {statCards.map(({ key, label, icon: Icon, ...rest }) => {
         const format = "format" in rest ? rest.format : (v: number) => String(v)
         return (
           <div
             key={key}
-            className={`bg-card border border-border rounded-2xl p-5 hover-lift hover:${color} transition-colors group`}
+            className="min-h-[152px] rounded-2xl border border-border bg-card p-5 transition-colors hover:bg-muted/40"
           >
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className={`w-9 h-9 rounded-xl ${color} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                <Icon className={`w-4 h-4 ${iconColor}`} />
+            <div className="mb-3 flex items-start gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted">
+                <Icon className="h-4 w-4 text-primary" />
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{label}</span>
+              <span className="pt-1 text-xs font-medium leading-snug text-muted-foreground">
+                {label}
+              </span>
             </div>
-            <p className="text-2xl font-bold text-foreground tracking-tight tabular-nums">
+            <p className="font-display text-[2rem] font-semibold leading-tight tracking-tight text-foreground tabular-nums">
               {format(values[key])}
             </p>
           </div>

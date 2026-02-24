@@ -31,6 +31,10 @@ export interface HistoryEntry {
   timestamp: string
   flights: number
   airlines: string[]
+  airlineCounts: Airline[]
+  avgAltitude: number
+  avgSpeed: number
+  countries: number
 }
 
 export interface FlightStats {

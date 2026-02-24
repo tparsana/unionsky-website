@@ -1,79 +1,81 @@
+/* app/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 95%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 9%;
-    --radius: 1rem;
+/* --- UnionSky: Minimal Journal theme (light) --- */
+:root {
+  /* Vintage ivory + emerald palette */
+  --background: 44 39% 90%;
+  --foreground: 156 28% 17%;
 
-    /* greyscale hover tints */
-    --hover-1: 0 0% 96%;
-    --hover-2: 0 0% 94%;
-    --hover-3: 0 0% 92%;
-    --hover-4: 0 0% 93%;
-    --hover-5: 0 0% 95%;
-    --hover-6: 0 0% 91%;
-  }
+  --card: 44 41% 94%;
+  --card-foreground: 156 28% 17%;
+  --popover: 44 41% 94%;
+  --popover-foreground: 156 28% 17%;
+
+  --border: 42 23% 78%;
+  --input: 42 23% 78%;
+
+  --muted: 43 30% 86%;
+  --muted-foreground: 154 19% 35%;
+
+  --primary: 147 43% 27%;
+  --primary-foreground: 44 41% 94%;
+
+  --secondary: 42 27% 88%;
+  --secondary-foreground: 156 28% 17%;
+
+  --accent: 146 28% 34%;
+  --accent-foreground: 44 41% 94%;
+
+  --destructive: 0 70% 44%;
+  --destructive-foreground: 44 41% 94%;
+
+  --ring: 147 43% 27%;
+  --radius: 1.25rem;
 }
+
+/* If you have dark mode later, you can add:
+.dark { ...tokens... }
+*/
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground antialiased;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='none' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, auto;
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    text-rendering: geometricPrecision;
+    background-image: radial-gradient(
+      circle at 12% 12%,
+      hsl(var(--muted) / 0.45) 0%,
+      hsl(var(--background)) 58%
+    );
   }
-  a, button, [role="button"], input, textarea, select, [tabindex] {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%23222' fill-opacity='0.08' stroke='%23222' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23222'/%3E%3C/svg%3E") 10 10, pointer;
+}
+
+/* Optional: nicer scrollbars (subtle, journal-y) */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
   }
-}
+  .font-mono {
+    font-family: var(--font-mono);
+  }
 
-::selection {
-  background: hsl(0 0% 80% / 0.4);
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 80%);
-  border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 65%);
-}
-
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  .scrollbar-soft::-webkit-scrollbar {
+    width: 10px;
+  }
+  .scrollbar-soft::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+    border: 2px solid hsl(var(--background));
+  }
+  .scrollbar-soft::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }

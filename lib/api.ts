@@ -9,6 +9,7 @@ const LOMAX = -111.917328
 // Airline codes mapping (from Python script, expanded)
 const AIRLINE_CODES: Record<string, string> = {
   SWA: "Southwest Airlines",
+  ATN: "Amazon Air",
   AAL: "American Airlines",
   DAL: "Delta Air Lines",
   UAL: "United Airlines",
