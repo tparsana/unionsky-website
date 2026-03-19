@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart3, Clock, Plane, Radio } from "lucide-react"
 import FlightOverview from "@/components/flight-overview"
@@ -45,6 +45,7 @@ export default function FlightDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const seenFlightsRef = useRef<Map<string, Flight>>(new Map())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,37 +56,61 @@ export default function FlightDashboard() {
         setFlights(data)
         setLastUpdated(new Date())
 
-        const uniqueCountries = new Set(data.map((f) => f.origin_country))
-        const uniqueAirlines = new Set(data.map((f) => f.airline))
+        const seenFlights = seenFlightsRef.current
+        const newlySeenFlights = data.filter((flight) => !seenFlights.has(flight.icao24))
+
+        for (const flight of newlySeenFlights) {
+          seenFlights.set(flight.icao24, flight)
+        }
+
+        const allSeenFlights = Array.from(seenFlights.values())
+        const uniqueCountries = new Set(allSeenFlights.map((f) => f.origin_country))
+        const uniqueAirlines = new Set(allSeenFlights.map((f) => f.airline))
         const airlineCounts = Array.from(uniqueAirlines).map((airline) => ({
           name: airline,
-          count: data.filter((f) => f.airline === airline).length,
+          count: allSeenFlights.filter((f) => f.airline === airline).length,
         }))
-        const avgAlt = data.reduce((sum, f) => sum + f.baro_altitude, 0) / (data.length || 1)
-        const avgSpd = data.reduce((sum, f) => sum + f.velocity, 0) / (data.length || 1)
+        const avgAlt =
+          allSeenFlights.reduce((sum, f) => sum + f.baro_altitude, 0) / (allSeenFlights.length || 1)
+        const avgSpd =
+          allSeenFlights.reduce((sum, f) => sum + f.velocity, 0) / (allSeenFlights.length || 1)
 
         setStats((prev) => {
           const newHistory = [...prev.history]
-          if (data.length > 0) {
+          if (newlySeenFlights.length > 0) {
+            const newFlightAirlines = new Set(newlySeenFlights.map((f) => f.airline))
+            const newFlightCountries = new Set(newlySeenFlights.map((f) => f.origin_country))
+            const newFlightAirlineCounts = Array.from(newFlightAirlines).map((airline) => ({
+              name: airline,
+              count: newlySeenFlights.filter((f) => f.airline === airline).length,
+            }))
+            const newFlightAvgAltitude =
+              newlySeenFlights.reduce((sum, f) => sum + f.baro_altitude, 0) /
+              newlySeenFlights.length
+            const newFlightAvgSpeed =
+              newlySeenFlights.reduce((sum, f) => sum + f.velocity, 0) / newlySeenFlights.length
+
             newHistory.push({
               timestamp: new Date().toISOString(),
-              flights: data.length,
-              airlines: Array.from(uniqueAirlines),
-              airlineCounts,
-              avgAltitude: avgAlt,
-              avgSpeed: avgSpd,
-              countries: uniqueCountries.size,
+              flights: newlySeenFlights.length,
+              airlines: Array.from(newFlightAirlines),
+              airlineCounts: newFlightAirlineCounts,
+              avgAltitude: newFlightAvgAltitude,
+              avgSpeed: newFlightAvgSpeed,
+              countries: newFlightCountries.size,
             })
           }
 
           return {
-            totalFlights: data.length,
+            totalFlights: allSeenFlights.length,
             avgAltitude: avgAlt,
             avgSpeed: avgSpd,
             countries: uniqueCountries.size,
             airlines: airlineCounts,
-            arrivals: data.filter((f) => f.destination !== "N/A").length,
-            departures: data.filter((f) => f.origin !== "N/A" && f.destination === "N/A").length,
+            arrivals: allSeenFlights.filter((f) => f.destination !== "N/A").length,
+            departures: allSeenFlights.filter(
+              (f) => f.origin !== "N/A" && f.destination === "N/A",
+            ).length,
             history: newHistory,
           }
         })
