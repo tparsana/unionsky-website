@@ -6,6 +6,9 @@
 
 /* --- UnionSky: Minimal Journal theme (light) --- */
 :root {
+  --font-sans: var(--font-hanken);
+  --font-display: var(--font-hanken);
+
   /* Vintage ivory + emerald palette */
   --background: 44 39% 90%;
   --foreground: 156 28% 17%;

@@ -45,6 +45,7 @@ export default function FlightDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const seenFlightsRef = useRef<Map<string, Flight>>(new Map())
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function FlightDashboard() {
         const data = dedupeFlightsByIcao24(fetchedFlights)
         setFlights(data)
         setLastUpdated(new Date())
+        setLoadError(null)
 
         const seenFlights = seenFlightsRef.current
         const newlySeenFlights = data.filter((flight) => !seenFlights.has(flight.icao24))
@@ -116,6 +118,7 @@ export default function FlightDashboard() {
         })
       } catch (error) {
         console.error("Error fetching flight data:", error)
+        setLoadError(error instanceof Error ? error.message : "Unable to load live flight data")
       } finally {
         setLoading(false)
       }
@@ -128,7 +131,7 @@ export default function FlightDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-[92rem] px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
-      <section className="relative overflow-hidden rounded-[2rem] bg-primary px-5 pb-16 pt-5 text-primary-foreground shadow-[0_26px_80px_-40px_hsl(var(--primary)/0.9)] sm:px-8 sm:pb-20 sm:pt-7 lg:px-10">
+      <section className="relative overflow-hidden rounded-[2rem] bg-primary px-5 pb-10 pt-5 text-primary-foreground shadow-[0_26px_80px_-40px_hsl(var(--primary)/0.9)] sm:px-8 sm:pb-12 sm:pt-7 lg:px-10">
         <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-52 w-52 rounded-full bg-black/15 blur-3xl" />
         <header className="relative z-10 flex items-center justify-between gap-4">
@@ -152,9 +155,8 @@ export default function FlightDashboard() {
             <p className="mb-3 text-xs uppercase tracking-[0.22em] text-primary-foreground/75">
               Planespotting Dashboard
             </p>
-            <h1 className="max-w-2xl font-display text-3xl leading-tight sm:text-4xl lg:text-[3.1rem]">
-              Live Air Traffic Outside
-              My Apartment Window.
+            <h1 className="font-display text-3xl leading-tight sm:text-4xl xl:whitespace-nowrap xl:text-[clamp(2.25rem,3vw,3.1rem)]">
+              Live Air Traffic Outside My Apartment Window.
             </h1>
           </div>
         </div>
@@ -183,7 +185,17 @@ export default function FlightDashboard() {
           </div>
 
           <div className="flex flex-col gap-3">
-            {loading ? (
+            {loadError && (
+              <div
+                role="alert"
+                className="rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm"
+              >
+                <p className="font-medium text-foreground">Live flight data is temporarily unavailable.</p>
+                <p className="mt-1 text-muted-foreground">{loadError}</p>
+              </div>
+            )}
+
+            {loading && flights.length === 0 ? (
               Array(3)
                 .fill(0)
                 .map((_, i) => (
@@ -204,6 +216,13 @@ export default function FlightDashboard() {
               flights.map((flight, index) => (
                 <FlightsInView key={flight.icao24} flight={flight} colorIndex={index} />
               ))
+            ) : loadError ? (
+              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-destructive/40 bg-background/80 py-20 text-center">
+                <p className="font-display text-base font-medium text-foreground">Live feed unavailable</p>
+                <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+                  The dashboard will retry automatically every 30 seconds.
+                </p>
+              </div>
             ) : (
               <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-background/80 py-20">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted">
@@ -267,7 +286,7 @@ export default function FlightDashboard() {
           <p className="text-sm text-muted-foreground">
             UnionSky Viewfinder · Created Curiously by{" "}
             <a
-              href="https://solo.to/tparsana"
+              href="https://tanishparsana.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary"

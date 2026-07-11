@@ -1,7 +1,7 @@
 // app/layout.tsx
 import "./globals.css"
 import type { Metadata } from "next"
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google"
+import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google"
 
 export const metadata: Metadata = {
   title: "UnionSky",
@@ -17,14 +17,9 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 }
 
-const display = Fraunces({
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  variable: "--font-display",
-})
-
-const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-hanken",
 })
 
 const mono = JetBrains_Mono({
@@ -34,7 +29,7 @@ const mono = JetBrains_Mono({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${hanken.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   )

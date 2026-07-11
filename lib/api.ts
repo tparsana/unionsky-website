@@ -181,7 +181,7 @@ const AIRPORT_CODES: Record<string, string> = {
  * Derive the airline name from the first 3 letters of callsign.
  * Matches Python: get_airline_name(callsign)
  */
-function getAirlineName(callsign: string): string {
+export function getAirlineName(callsign: string): string {
   if (callsign && callsign.length >= 3) {
     const prefix = callsign.substring(0, 3).toUpperCase()
     return AIRLINE_CODES[prefix] || "Unknown Airline"
@@ -257,80 +257,22 @@ async function getFlightDetails(icao24: string): Promise<{ origin: string; desti
 }
 
 /**
- * Fetch all aircraft states in the bounding box, then enrich each with
- * origin/destination from the flights/aircraft endpoint.
- * Matches Python: display_flights()
+ * Browser clients only call the app's server route. This avoids OpenSky's CORS
+ * restriction and keeps credentials and provider failures off the client.
  */
 export async function fetchFlights(): Promise<Flight[]> {
-  try {
-    const url = `https://opensky-network.org/api/states/all?lamin=${LAMIN}&lamax=${LAMAX}&lomin=${LOMIN}&lomax=${LOMAX}`
-    const response = await fetch(url)
+  const response = await fetch("/api/flights", { cache: "no-store" })
+  const payload = (await response.json().catch(() => null)) as
+    | { flights?: Flight[]; error?: string }
+    | null
 
-    if (!response.ok) {
-      throw new Error(`OpenSky API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    if (!data.states || !Array.isArray(data.states)) {
-      return []
-    }
-
-    // Parse each state vector exactly like Python's StateVector class
-    const flights: Flight[] = await Promise.all(
-      data.states.map(async (arr: any[]) => {
-        const icao24 = arr[0] || ""
-        const callsign = arr[1]?.trim() || "N/A"
-        const originCountry = arr[2] || "N/A"
-        const timePosition = arr[3] || 0
-        const lastContact = arr[4] || 0
-        const longitude = arr[5] || 0
-        const latitude = arr[6] || 0
-        const geoAltitude = arr[7] || 0
-        const onGround = arr[8] || false
-        const velocity = arr[9] !== null && arr[9] !== undefined ? arr[9] : 0
-        const trueTrack = arr[10] || 0
-        const verticalRate = arr[11] || 0
-        const sensors = arr[12] || []
-        const baroAltitude = arr[13] !== null && arr[13] !== undefined ? arr[13] : 0
-        const squawk = arr[14] || ""
-        const spi = arr[15] || false
-        const positionSource = arr[16] || 0
-
-        const airline = getAirlineName(callsign)
-
-        // Get real origin/destination from flights/aircraft endpoint
-        const { origin, destination } = await getFlightDetails(icao24)
-
-        return {
-          icao24,
-          callsign,
-          origin_country: originCountry,
-          time_position: timePosition,
-          last_contact: lastContact,
-          longitude,
-          latitude,
-          geo_altitude: geoAltitude,
-          on_ground: onGround,
-          velocity,
-          true_track: trueTrack,
-          vertical_rate: verticalRate,
-          sensors,
-          baro_altitude: baroAltitude,
-          squawk,
-          spi,
-          position_source: positionSource,
-          airline,
-          origin,
-          destination,
-          model: "N/A", // Not provided by OpenSky API
-        }
-      }),
-    )
-
-    return flights
-  } catch (error) {
-    console.error("Error fetching flight data:", error)
-    return []
+  if (!response.ok) {
+    throw new Error(payload?.error || `Flight data request failed (${response.status})`)
   }
+
+  if (!Array.isArray(payload?.flights)) {
+    throw new Error("Flight data response was invalid")
+  }
+
+  return payload.flights
 }
