@@ -4,9 +4,14 @@ import type { Flight } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
+// Keep the outbound request near Phoenix instead of relying on a distant default region.
+export const preferredRegion = "sfo1"
 
 const STATE_CACHE_MS = 45_000
+const STALE_CACHE_MS = 10 * 60_000
 const TOKEN_SAFETY_WINDOW_MS = 60_000
+const OPEN_SKY_TIMEOUT_MS = 12_000
+const RETRY_DELAY_MS = 500
 
 const DEFAULT_GEOFENCE = {
   lamin: 33.421699,
@@ -22,6 +27,21 @@ type CachedPayload = {
 
 let stateCache: { expiresAt: number; payload: CachedPayload } | null = null
 let tokenCache: { accessToken: string; expiresAt: number } | null = null
+
+function sleep(duration: number) {
+  return new Promise((resolve) => setTimeout(resolve, duration))
+}
+
+function errorMessage(error: unknown) {
+  if (!(error instanceof Error)) return "Unable to retrieve live flight data"
+
+  const cause = error.cause
+  if (cause instanceof Error && cause.message) {
+    return `${error.message}: ${cause.message}`
+  }
+
+  return error.message
+}
 
 function readCoordinate(name: keyof typeof DEFAULT_GEOFENCE): number {
   const configuredValue = process.env[`OPEN_SKY_${name.toUpperCase()}`]
@@ -82,6 +102,36 @@ async function getAccessToken(): Promise<string | null> {
   }
 
   return tokenCache.accessToken
+}
+
+async function fetchOpenSkyStates(url: string, accessToken: string | null) {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "UnionSky/1.0 (+https://tanishparsana.com)",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(OPEN_SKY_TIMEOUT_MS),
+      })
+
+      if (response.ok || attempt === 1 || ![408, 429, 500, 502, 503, 504].includes(response.status)) {
+        return response
+      }
+
+      lastError = new Error(`OpenSky state request failed (${response.status})`)
+    } catch (error) {
+      lastError = error
+    }
+
+    await sleep(RETRY_DELAY_MS)
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("OpenSky state request failed")
 }
 
 function isInsideGeofence(latitude: number | null, longitude: number | null) {
@@ -147,11 +197,10 @@ export async function GET() {
     const query = new URLSearchParams(
       Object.entries(geofence).map(([key, value]) => [key, String(value)]),
     )
-    const response = await fetch(`https://opensky-network.org/api/states/all?${query}`, {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-      cache: "no-store",
-      signal: AbortSignal.timeout(12_000),
-    })
+    const response = await fetchOpenSkyStates(
+      `https://opensky-network.org/api/states/all?${query}`,
+      accessToken,
+    )
 
     if (!response.ok) {
       throw new Error(`OpenSky state request failed (${response.status})`)
@@ -172,7 +221,18 @@ export async function GET() {
       headers: { "Cache-Control": "public, s-maxage=45, stale-while-revalidate=30" },
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to retrieve live flight data"
-    return NextResponse.json({ error: message }, { status: 502 })
+    console.error("OpenSky live-flight request failed", error)
+
+    // A temporary upstream failure should not empty an otherwise live dashboard.
+    if (stateCache && stateCache.expiresAt + STALE_CACHE_MS > Date.now()) {
+      return NextResponse.json(stateCache.payload, {
+        headers: {
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=30",
+          "X-Flight-Data": "stale",
+        },
+      })
+    }
+
+    return NextResponse.json({ error: errorMessage(error) }, { status: 502 })
   }
 }
