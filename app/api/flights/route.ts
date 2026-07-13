@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { getAircraftDisplayName } from "@/lib/aircraft-types"
 import { getAirlineName } from "@/lib/api"
 import type { Flight } from "@/lib/types"
 
@@ -279,7 +280,7 @@ function parseAdsbLolFlight(aircraft: AdsbLolAircraft, now: number): Flight | nu
     airline: getAirlineName(callsign),
     origin: "N/A",
     destination: "N/A",
-    model: typeof aircraft.t === "string" ? aircraft.t : "N/A",
+    model: typeof aircraft.t === "string" ? getAircraftDisplayName(aircraft.t) : "N/A",
     registration: typeof aircraft.r === "string" ? aircraft.r : "N/A",
     aircraft_category: typeof aircraft.category === "string" ? aircraft.category : "N/A",
     emergency: typeof aircraft.emergency === "string" ? aircraft.emergency : "none",
