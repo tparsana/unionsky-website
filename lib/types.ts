@@ -20,6 +20,10 @@ export interface Flight {
   origin: string
   destination: string
   model: string
+  registration: string
+  aircraft_category: string
+  emergency: string
+  position_age_seconds: number
 }
 
 export interface Airline {

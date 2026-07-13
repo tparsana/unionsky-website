@@ -36,6 +36,8 @@ type AdsbLolAircraft = {
   flight?: unknown
   r?: unknown
   t?: unknown
+  category?: unknown
+  emergency?: unknown
   lat?: unknown
   lon?: unknown
   alt_baro?: unknown
@@ -46,6 +48,7 @@ type AdsbLolAircraft = {
   baro_rate?: unknown
   squawk?: unknown
   seen?: unknown
+  seen_pos?: unknown
 }
 
 let stateCache: { expiresAt: number; payload: CachedPayload; provider: FlightProvider } | null = null
@@ -70,6 +73,10 @@ function getGeofence() {
   }
 }
 
+/**
+ * Dormant OpenSky provider adapter. It is deliberately not called by GET while
+ * Vercel cannot reach OpenSky. Keep it here to restore OpenSky as primary later.
+ */
 async function getAccessToken(): Promise<string | null> {
   const clientId = process.env.OPEN_SKY_CLIENT_ID
   const clientSecret = process.env.OPEN_SKY_CLIENT_SECRET
@@ -222,6 +229,10 @@ function parseOpenSkyFlight(state: unknown[]): Flight | null {
     origin: "N/A",
     destination: "N/A",
     model: "N/A",
+    registration: "N/A",
+    aircraft_category: "N/A",
+    emergency: "none",
+    position_age_seconds: 0,
   }
 }
 
@@ -243,6 +254,7 @@ function parseAdsbLolFlight(aircraft: AdsbLolAircraft, now: number): Flight | nu
   const baroAltitude = typeof aircraft.alt_baro === "number" ? aircraft.alt_baro : 0
   const geometricAltitude = numberValue(aircraft.alt_geom)
   const lastSeenSeconds = numberValue(aircraft.seen)
+  const positionAgeSeconds = numberValue(aircraft.seen_pos) || lastSeenSeconds
   const observedAt = Math.max(0, now - Math.round(lastSeenSeconds))
 
   return {
@@ -268,6 +280,10 @@ function parseAdsbLolFlight(aircraft: AdsbLolAircraft, now: number): Flight | nu
     origin: "N/A",
     destination: "N/A",
     model: typeof aircraft.t === "string" ? aircraft.t : "N/A",
+    registration: typeof aircraft.r === "string" ? aircraft.r : "N/A",
+    aircraft_category: typeof aircraft.category === "string" ? aircraft.category : "N/A",
+    emergency: typeof aircraft.emergency === "string" ? aircraft.emergency : "none",
+    position_age_seconds: positionAgeSeconds,
   }
 }
 
@@ -298,61 +314,29 @@ export async function GET() {
   }
 
   try {
-    const geofence = getGeofence()
-    const accessToken = await getAccessToken()
-    const query = new URLSearchParams(
-      Object.entries(geofence).map(([key, value]) => [key, String(value)]),
-    )
-    const response = await fetchOpenSkyStates(
-      `https://opensky-network.org/api/states/all?${query}`,
-      accessToken,
-    )
-
+    const response = await fetchAdsbLolStates(getAdsbLolUrl(getGeofence()))
     if (!response.ok) {
-      throw new Error(`OpenSky state request failed (${response.status})`)
+      throw new Error(`adsb.lol request failed (${response.status})`)
     }
 
-    const data = (await response.json()) as { states?: unknown[][] }
-    const flights = Array.isArray(data.states)
-      ? data.states.map(parseOpenSkyFlight).filter((flight): flight is Flight => flight !== null)
+    const data = (await response.json()) as { ac?: AdsbLolAircraft[]; now?: number }
+    const now = typeof data.now === "number" ? Math.round(data.now / 1_000) : Math.round(Date.now() / 1_000)
+    const flights = Array.isArray(data.ac)
+      ? data.ac.map((aircraft) => parseAdsbLolFlight(aircraft, now)).filter((flight): flight is Flight => flight !== null)
       : []
     const payload = { flights, updatedAt: new Date().toISOString() }
 
     stateCache = {
       payload,
       expiresAt: Date.now() + STATE_CACHE_MS,
-      provider: "opensky",
+      provider: "adsb-lol",
     }
 
-    return jsonResponse(payload, "opensky")
-  } catch (openSkyError) {
-    console.warn("OpenSky live-flight request failed; trying adsb.lol", openSkyError)
+    return jsonResponse(payload, "adsb-lol")
+  } catch (adsbLolError) {
+    console.error("adsb.lol live-flight request failed", adsbLolError)
 
-    try {
-      const response = await fetchAdsbLolStates(getAdsbLolUrl(getGeofence()))
-      if (!response.ok) {
-        throw new Error(`adsb.lol request failed (${response.status})`)
-      }
-
-      const data = (await response.json()) as { ac?: AdsbLolAircraft[]; now?: number }
-      const now = typeof data.now === "number" ? Math.round(data.now / 1_000) : Math.round(Date.now() / 1_000)
-      const flights = Array.isArray(data.ac)
-        ? data.ac.map((aircraft) => parseAdsbLolFlight(aircraft, now)).filter((flight): flight is Flight => flight !== null)
-        : []
-      const payload = { flights, updatedAt: new Date().toISOString() }
-
-      stateCache = {
-        payload,
-        expiresAt: Date.now() + STATE_CACHE_MS,
-        provider: "adsb-lol",
-      }
-
-      return jsonResponse(payload, "adsb-lol")
-    } catch (adsbLolError) {
-      console.error("Live-flight fallback request failed", { openSkyError, adsbLolError })
-    }
-
-    // A temporary upstream failure should not empty an otherwise live dashboard.
+    // A temporary provider failure should not empty an otherwise live dashboard.
     if (stateCache && stateCache.expiresAt + STALE_CACHE_MS > Date.now()) {
       return jsonResponse(stateCache.payload, stateCache.provider, "public, s-maxage=30, stale-while-revalidate=30")
     }

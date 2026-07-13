@@ -138,10 +138,13 @@ export default function FlightsInView({
               <div className="grid grid-cols-2">
                 <Property icon={Globe} label="Country" value={flight.origin_country} />
                 <Property icon={Plane} label="Aircraft" value={flight.model || "N/A"} />
-                <Property icon={MapPin} label="Origin" value={flight.origin} />
-                <Property icon={MapPin} label="Destination" value={flight.destination} />
+                <Property icon={Hash} label="Registration" value={flight.registration || "N/A"} mono />
+                <Property icon={MapPin} label="Origin" value={flight.origin === "N/A" ? "Not broadcast" : flight.origin} />
+                <Property icon={MapPin} label="Destination" value={flight.destination === "N/A" ? "Not broadcast" : flight.destination} />
                 <Property icon={Radio} label="ICAO24" value={flight.icao24} mono />
                 <Property icon={Hash} label="Squawk" value={flight.squawk || "N/A"} mono />
+                <Property icon={Radio} label="Signal age" value={`${flight.position_age_seconds.toFixed(1)}s`} />
+                <Property icon={ArrowUpDown} label="Emergency" value={flight.emergency} />
                 <Property
                   icon={ArrowUpDown}
                   label="Vertical Rate"
